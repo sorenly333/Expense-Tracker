@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Daily Expense</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f9f9f9;
+        }
+
+        h2 {
+            color: #333;
+        }
+
+        form {
+            margin-bottom: 20px;
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        input,
+        button {
+            padding: 8px;
+            margin: 5px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            background: #007BFF;
+            color: white;
+            cursor: pointer;
+            border: none;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 20px;
+            background: #fff;
+        }
+
+        th,
+        td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background: #007BFF;
+            color: white;
+        }
+
+        .action-btn {
+            padding: 5px 10px;
+            margin: 2px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .edit {
+            background: #28a745;
+            color: white;
+        }
+
+        .edit:hover {
+            background: #1e7e34;
+        }
+
+        .delete,
+        .clear {
+            background: #dc3545;
+            color: white;
+        }
+
+        .delete:hover,
+        .clear:hover {
+            background: #a71d2a;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h2>Daily Expense Form</h2>
+    <a href="./index.html"><button>Home</button></a>
+    <a href="./food-expense-weekly.html"><button>Food</button></a>
+    <a href="./total-daily-report.html"><button>Report</button></a>
+    <form id="dailyForm">
+        <input type="hidden" id="editIndex">
+        <input type="date" id="date" required>
+        <input type="text" id="item" placeholder="Item" required>
+        <input type="number" id="amountUsd" placeholder="Amount in $" step="0.01">
+        <input type="number" id="amountKhr" placeholder="Amount in ៛">
+        <button type="submit">Save</button>
+    </form>
+
+    <button onclick="downloadCSV()">Download as CSV</button>
+    <button class="clear" onclick="clearData()">Clear All Data</button>
+    <h3>Filter by Date</h3>
+    <input type="date" id="filterDate">
+    <button onclick="filterByDate()">Filter</button>
+    <button onclick="clearFilter()">Show All</button>
+
+    <table id="dataTable">
+        <thead>
+            <tr>
+                <th>Nº</th>
+                <th>Date</th>
+                <th>Item</th>
+                <th>Amount ($)</th>
+                <th>Amount (៛)</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <script>
+        const form = document.getElementById('dailyForm');
+        const tableBody = document.querySelector('#dataTable tbody');
+        const editIndexInput = document.getElementById('editIndex');
+
+        let dailyData = JSON.parse(localStorage.getItem('dailyExpense')) || [];
+        let counter = parseInt(localStorage.getItem('dailyExpenseCounter')) || 1; // track Nº
+
+        function renderTable() {
+            tableBody.innerHTML = "";
+            dailyData.forEach((row, index) => {
+                let tr = document.createElement('tr');
+                tr.innerHTML = `
+        <td>${row.no}</td>
+        <td>${row.date}</td>
+        <td>${row.item}</td>
+        <td>${row.amountUsd}</td>
+        <td>${row.amountKhr}</td>
+        <td>
+          <button class="action-btn edit" onclick="editData(${index})">Edit</button>
+          <button class="action-btn delete" onclick="deleteData(${index})">Delete</button>
+        </td>`;
+                tableBody.appendChild(tr);
+            });
+        }
+
+        form.addEventListener('submit', e => {
+            e.preventDefault();
+            const newData = {
+                no: editIndexInput.value === "" ? counter : dailyData[editIndexInput.value].no,
+                date: document.getElementById('date').value,
+                item: document.getElementById('item').value,
+                amountUsd: document.getElementById('amountUsd').value,
+                amountKhr: document.getElementById('amountKhr').value
+            };
+
+            if (editIndexInput.value === "") {
+                // Add new record
+                dailyData.push(newData);
+                counter++;
+                localStorage.setItem('dailyExpenseCounter', counter);
+            } else {
+                // Update record
+                dailyData[editIndexInput.value] = newData;
+                editIndexInput.value = "";
+            }
+
+            localStorage.setItem('dailyExpense', JSON.stringify(dailyData));
+            renderTable();
+            form.reset();
+        });
+
+        function editData(index) {
+            document.getElementById('date').value = dailyData[index].date;
+            document.getElementById('item').value = dailyData[index].item;
+            document.getElementById('amountUsd').value = dailyData[index].amountUsd;
+            document.getElementById('amountKhr').value = dailyData[index].amountKhr;
+            editIndexInput.value = index;
+        }
+
+        function deleteData(index) {
+            if (confirm("Delete this record?")) {
+                dailyData.splice(index, 1);
+                localStorage.setItem('dailyExpense', JSON.stringify(dailyData));
+                renderTable();
+            }
+        }
+
+        function downloadCSV() {
+            if (dailyData.length === 0) { alert("No data to export!"); return; }
+            let csvContent = "data:text/csv;charset=utf-8,Nº,Date,Item,Amount($),Amount(៛)\n"
+                + dailyData.map(e => `${e.no},${e.date},${e.item},${e.amountUsd},${e.amountKhr}`).join("\n");
+
+            const link = document.createElement("a");
+            link.setAttribute("href", encodeURI(csvContent));
+            link.setAttribute("download", "daily_expense.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function clearData() {
+            if (confirm("Clear all records?")) {
+                dailyData = [];
+                counter = 1;
+                localStorage.removeItem('dailyExpense');
+                localStorage.removeItem('dailyExpenseCounter');
+                renderTable();
+            }
+        }
+
+        function filterByDate() {
+            const filterDate = document.getElementById('filterDate').value;
+            if (!filterDate) return alert("Please select a date to filter.");
+
+            const tbody = document.querySelector('#dataTable tbody');
+            tbody.innerHTML = "";
+
+            dailyData.forEach((row, index) => {
+                if (row.date === filterDate) {
+                    let tr = document.createElement('tr');
+                    tr.innerHTML = `
+        <td>${row.no}</td>
+        <td>${row.date}</td>
+        <td>${row.item}</td>
+        <td>${row.amountUsd}</td>
+        <td>${row.amountKhr}</td>
+        <td>
+          <button class="action-btn edit" onclick="editData(${index})">Edit</button>
+          <button class="action-btn delete" onclick="deleteData(${index})">Delete</button>
+        </td>`;
+                    tbody.appendChild(tr);
+                }
+            });
+        }
+
+        function clearFilter() {
+            document.getElementById('filterDate').value = "";
+            renderTable();
+        }
+
+
+        renderTable();
+    </script>
+
+</body>
+
+</html>

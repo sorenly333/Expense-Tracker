@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Daily Expense Report</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f9f9f9;
+        }
+
+        h2 {
+            color: #333;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 20px;
+            background: #fff;
+        }
+
+        th,
+        td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background: #007BFF;
+            color: white;
+        }
+
+        input,
+        button {
+            padding: 8px;
+            margin: 5px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            background: #007BFF;
+            color: white;
+            cursor: pointer;
+            border: none;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        .edit {
+            background: #28a745;
+            color: white;
+        }
+
+        .edit:hover {
+            background: #1e7e34;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h2>Daily Expense Report (Daily Total)</h2>
+    <a href="./index.html"><button>Home</button></a>
+    <a href="./daily-expense.html"><button>Daily</button></a>
+    <a href="./food-expense-weekly.html"><button>Food</button></a>
+    <a href="./monthly-food-report.html"><button>Report Food</button></a><br>
+    <button class="edit" onclick="downloadCSV()">Download as CSV</button>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Total $</th>
+                <th>Total ៛</th>
+            </tr>
+        </thead>
+        <tbody id="reportBody"></tbody>
+    </table>
+
+    <script>
+        // Get daily expenses from LocalStorage
+        let dailyData = JSON.parse(localStorage.getItem('dailyExpense')) || [];
+
+        // Group and sum by date
+        let report = {};
+        dailyData.forEach(row => {
+            let date = row.date;
+            if (!report[date]) {
+                report[date] = { totalUsd: 0, totalKhr: 0 };
+            }
+            report[date].totalUsd += Number(row.amountUsd) || 0;
+            report[date].totalKhr += Number(row.amountKhr) || 0;
+        });
+
+        // Render report table
+        let tbody = document.getElementById('reportBody');
+        Object.keys(report).sort().forEach(date => {
+            let tr = document.createElement('tr');
+            tr.innerHTML = `
+      <td>${date}</td>
+      <td>${report[date].totalUsd.toFixed(2)}</td>
+      <td>${report[date].totalKhr.toLocaleString()}</td>
+    `;
+            tbody.appendChild(tr);
+        });
+
+        // CSV download function
+        function downloadCSV() {
+            const keys = Object.keys(report);
+            if (keys.length === 0) {
+                alert("Cannot download, no data available!");
+                return;
+            }
+
+            let csvContent = "data:text/csv;charset=utf-8,Date,Total $,Total ៛\n";
+            keys.sort().forEach(date => {
+                csvContent += `${date},${report[date].totalUsd.toFixed(2)},${report[date].totalKhr}\n`;
+            });
+
+            const link = document.createElement("a");
+            link.setAttribute("href", encodeURI(csvContent));
+            link.setAttribute("download", "daily_expense_report.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
+
+</body>
+
+</html>

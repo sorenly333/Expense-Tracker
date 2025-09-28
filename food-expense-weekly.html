@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Food Expense</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f9f9f9;
+        }
+
+        h2 {
+            color: #333;
+        }
+
+        form {
+            margin-bottom: 20px;
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        input,
+        select,
+        button {
+            padding: 8px;
+            margin: 5px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            background: #007BFF;
+            color: white;
+            cursor: pointer;
+            border: none;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 20px;
+            background: #fff;
+        }
+
+        th,
+        td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background: #007BFF;
+            color: white;
+        }
+
+        .action-btn {
+            padding: 5px 10px;
+            margin: 2px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .edit {
+            background: #28a745;
+            color: white;
+        }
+
+        .edit:hover {
+            background: #1e7e34;
+        }
+
+        .delete,
+        .clear {
+            background: #dc3545;
+            color: white;
+        }
+
+        .delete:hover,
+        .clear:hover {
+            background: #a71d2a;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h2>Food Expense Form</h2>
+    <a href="./index.html"><button>Home</button></a>
+    <a href="./daily-expense.html"><button>Daily</button></a>
+    <a href="./monthly-food-report.html"><button>Report</button></a>
+    <form id="foodForm">
+        <input type="hidden" id="editIndex">
+
+        <label>Week:</label>
+        <select id="week" required>
+            <option value="">Select Week</option>
+            <option>Week 1</option>
+            <option>Week 2</option>
+            <option>Week 3</option>
+            <option>Week 4</option>
+        </select>
+
+        <label>Month:</label>
+        <select id="month" required>
+            <option value="">Select Month</option>
+            <option>Jan</option>
+            <option>Feb</option>
+            <option>Mar</option>
+            <option>Apr</option>
+            <option>May</option>
+            <option>Jun</option>
+            <option>Jul</option>
+            <option>Aug</option>
+            <option>Sep</option>
+            <option>Oct</option>
+            <option>Nov</option>
+            <option>Dec</option>
+        </select>
+
+        <label>Year:</label>
+        <select id="year" required>
+            <option value="">Select Year</option>
+            <script>
+                let yearSelect = '';
+                const currentYear = new Date().getFullYear();
+                for (let y = currentYear; y <= currentYear + 105; y++) {
+                    yearSelect += `<option>${y}</option>`;
+                }
+                document.write(yearSelect);
+            </script>
+        </select>
+        <br>
+
+        <input type="number" id="amountKhr" placeholder="Amount (៛)" min="0" value="0" required>
+        <input type="number" id="expectedAmount" placeholder="Expected Amount (៛)" value="60000" readonly><br>
+
+        <button type="submit">Save</button>
+    </form>
+
+    <button onclick="downloadCSV()">Download as CSV</button>
+    <button class="clear" onclick="clearData()">Clear All Data</button>
+    <table id="dataTable">
+        <thead>
+            <tr>
+                <th>Nº</th>
+                <th>Week</th>
+                <th>Month</th>
+                <th>Year</th>
+                <th>Amount (៛)</th>
+                <th>Expected (៛)</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <script>
+        const form = document.getElementById('foodForm');
+        const tableBody = document.querySelector('#dataTable tbody');
+        const editIndexInput = document.getElementById('editIndex');
+
+        let foodData = JSON.parse(localStorage.getItem('foodExpense')) || [];
+        let counter = parseInt(localStorage.getItem('foodExpenseCounter')) || 1;
+
+        function renderTable() {
+            tableBody.innerHTML = "";
+            foodData.forEach((row, index) => {
+                let tr = document.createElement('tr');
+                tr.innerHTML = `
+            <td>${index + 1}</td> <!-- Always start from 1 -->
+            <td>${row.week}</td>
+            <td>${row.month}</td>
+            <td>${row.year}</td>
+            <td>${row.amount}</td>
+            <td>${row.expected}</td>
+            <td>
+                <button class="action-btn edit" onclick="editData(${index})">Edit</button>
+                <button class="action-btn delete" onclick="deleteData(${index})">Delete</button>
+            </td>`;
+                tableBody.appendChild(tr);
+            });
+        }
+
+
+        form.addEventListener('submit', e => {
+            e.preventDefault();
+            const newData = {
+                no: editIndexInput.value === "" ? counter : foodData[editIndexInput.value].no,
+                week: document.getElementById('week').value,
+                month: document.getElementById('month').value,
+                year: document.getElementById('year').value,
+                amount: Number(document.getElementById('amountKhr').value),
+                expected: Number(document.getElementById('expectedAmount').value)
+            };
+
+            if (editIndexInput.value === "") {
+                foodData.push(newData);
+                counter++;
+                localStorage.setItem('foodExpenseCounter', counter);
+            } else {
+                foodData[editIndexInput.value] = newData;
+                editIndexInput.value = "";
+            }
+
+            localStorage.setItem('foodExpense', JSON.stringify(foodData));
+            renderTable();
+            form.reset();
+        });
+
+        function editData(index) {
+            const row = foodData[index];
+            document.getElementById('week').value = row.week;
+            document.getElementById('month').value = row.month;
+            document.getElementById('year').value = row.year;
+            document.getElementById('amountKhr').value = row.amount;
+            editIndexInput.value = index;
+        }
+
+        function deleteData(index) {
+            if (confirm("Delete this record?")) {
+                foodData.splice(index, 1);
+                localStorage.setItem('foodExpense', JSON.stringify(foodData));
+                renderTable();
+            }
+        }
+
+        function downloadCSV() {
+            if (foodData.length === 0) { alert("No data to export!"); return; }
+            let csvContent = "data:text/csv;charset=utf-8,Nº,Week,Month,Year,Amount(៛),Expected(៛)\n"
+                + foodData.map(e => `${e.no},${e.week},${e.month},${e.year},${e.amount},${e.expected}`).join("\n");
+
+            const link = document.createElement("a");
+            link.setAttribute("href", encodeURI(csvContent));
+            link.setAttribute("download", "food_expense.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function clearData() {
+            if (confirm("Clear all records?")) {
+                foodData = [];
+                counter = 1;
+                localStorage.removeItem('foodExpense');
+                localStorage.removeItem('foodExpenseCounter');
+                renderTable();
+            }
+        }
+
+        renderTable();
+    </script>
+
+</body>
+
+</html>
