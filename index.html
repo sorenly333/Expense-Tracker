@@ -210,7 +210,7 @@
     <a href="./food-expense-weekly.html" class="btn">Food Expense Weekly</a>
     <a href="./total-daily-report.html" class="btn">Total Daily Report</a>
     <a href="./monthly-food-report.html" class="btn">Monthly Food Report</a>
-    <button class="btn" onclick="toggleExpense()">Show / Hide Monthly Expense</button>
+    <button class="btn" id="toggleExpenseBtn" onclick="toggleExpense()"></button>
   </div>
   <!-- Expense -->
   <div class="container" id="expenseBox">
@@ -361,7 +361,32 @@
 
     function toggleExpense() {
       const box = document.getElementById("expenseBox");
-      box.style.display = (box.style.display === "none") ? "block" : "none";
+      const btn = document.getElementById("toggleExpenseBtn");
+
+      if (box.style.display === "none") {
+        box.style.display = "block";
+        localStorage.setItem("expenseVisible", "true");
+        btn.textContent = "Hide Monthly Expense";
+      } else {
+        box.style.display = "none";
+        localStorage.setItem("expenseVisible", "false");
+        btn.textContent = "Show Monthly Expense";
+      }
+    }
+
+    // Load saved state on refresh
+    window.onload = function () {
+      const box = document.getElementById("expenseBox");
+      const btn = document.getElementById("toggleExpenseBtn");
+      const isVisible = localStorage.getItem("expenseVisible");
+
+      if (isVisible === "false") {
+        box.style.display = "none";
+        btn.textContent = "Show Monthly Expense";
+      } else {
+        box.style.display = "block";
+        btn.textContent = "Hide Monthly Expense";
+      }
     }
 
 
