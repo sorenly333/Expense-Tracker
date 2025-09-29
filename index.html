@@ -1,23 +1,384 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<title>Expense Tracker</title>
-<style>
-  body { font-family: Arial, sans-serif; background: #f9f9f9; text-align: center; padding: 50px; }
-  h1 { color: #333; }
-  .btn { display: inline-block; padding: 15px 25px; margin: 20px; font-size: 18px; color: white; background: #007BFF; border: none; border-radius: 8px; cursor: pointer; text-decoration: none; }
-  .btn:hover { background: #0056b3; }
-</style>
+  <meta charset="UTF-8">
+  <title>Expense Tracker</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #f5f7fa;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      color: #222;
+      text-align: center;
+    }
+
+    /* Navigation Buttons */
+    .nav-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      justify-content: center;
+      margin-bottom: 30px;
+    }
+
+    .btn {
+      padding: 12px 20px;
+      font-size: 16px;
+      color: white;
+      background: #007BFF;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      text-decoration: none;
+      text-align: center;
+      min-width: 200px;
+      transition: background 0.2s;
+    }
+
+    .btn:hover {
+      background: #0056b3;
+    }
+
+    /* Calculator & History Container */
+    .container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+      width: 100%;
+      max-width: 800px;
+    }
+
+    .calculator,
+    .history {
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+      flex: 1;
+      min-width: 280px;
+    }
+
+    #display {
+      width: 100%;
+      height: 50px;
+      text-align: right;
+      /* padding: 10px; */
+      font-size: 1.5em;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      background: #f9f9f9;
+    }
+
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+
+    button {
+      padding: 15px;
+      font-size: 1.1em;
+      border: none;
+      border-radius: 8px;
+      background: #007BFF;
+      color: #fff;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    button:hover {
+      background: #0056b3;
+    }
+
+    .equal {
+      grid-column: span 2;
+      background: #28a745;
+    }
+
+    .equal:hover {
+      background: #1e7e34;
+    }
+
+    .clear {
+      background: #dc3545;
+    }
+
+    .clear:hover {
+      background: #a71d2a;
+    }
+
+    .calculator-actions {
+      margin-top: 15px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    /* History */
+    .history {
+      max-height: 400px;
+      overflow-y: auto;
+      display: none;
+    }
+
+    .history h3 {
+      margin-top: 0;
+      text-align: center;
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+
+    .history ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .history li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 0;
+      border-bottom: 1px solid #eee;
+      font-size: 0.95em;
+    }
+
+    .delete-btn {
+      background: #dc3545;
+      border: none;
+      color: white;
+      font-size: 0.8em;
+      border-radius: 4px;
+      padding: 2px 6px;
+      cursor: pointer;
+    }
+
+    .delete-btn:hover {
+      background: #a71d2a;
+    }
+
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      background: #fff;
+    }
+
+    th,
+    td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: left;
+    }
+
+    th {
+      background: #007BFF;
+      color: white;
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      .buttons {
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      .btn {
+        min-width: 100%;
+      }
+    }
+  </style>
 </head>
+
 <body>
 
-<h1>Expense Tracker</h1>
+  <h1>Expense Tracker</h1>
 
-<a href="./daily-expense.html" class="btn">Daily Expense</a>
-<a href="./food-expense-weekly.html" class="btn">Food Expense Weekly</a>
-<a href="./total-daily-report.html" class="btn">Total Daily Report</a>
-<a href="./monthly-food-report.html" class="btn">Monthly Food Report</a>
+  <div class="nav-buttons">
+    <a href="./daily-expense.html" class="btn">Daily Expense</a>
+    <a href="./food-expense-weekly.html" class="btn">Food Expense Weekly</a>
+    <a href="./total-daily-report.html" class="btn">Total Daily Report</a>
+    <a href="./monthly-food-report.html" class="btn">Monthly Food Report</a>
+  </div>
+<!-- Expense -->
+  <h1>Expense</h1>
+  <div class="container">
+    <table>
+      <thead>
+        <tr>
+          <th>Nº</th>
+          <th>Item</th>
+          <th>$</th>
+          <th>៛</th>
+        </tr>
+        <tr>
+          <td>1</td>
+          <td>Rent (បន្ទប់ជួល & ទឹក-ភ្លើង)</td>
+          <td>100$</td>
+          <td>400000៛</td>
+        </tr>
+        <tr style="background-color: #4f9ce0; font-weight: bold; color: white;">
+          <td>2</td>
+          <td>Saving (សន្សំ)</td>
+          <td>100$</td>
+          <td>400000៛</td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td>Food (ម្ហូប)</td>
+          <td>60$</td>
+          <td>240000៛</td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td>Gasoline (សាំង)</td>
+          <td>40$</td>
+          <td>160000៛</td>
+        </tr>
+        <tr style="text-align: center; background: green; font-weight: bold; color: white;">
+          <td colspan="2">Total</td>
+          <td>300$</td>
+          <td>1200000៛</td>
+        </tr>
+      </thead>
+      <tbody id="expenseTable"></tbody>
+    </table>
+  </div>
+  <h1>Calculator</h1>
+  <div class="container">
+    <!-- Calculator -->
+    <div class="calculator">
+      <input type="text" id="display" disabled>
+      <div class="buttons">
+        <button onclick="append('7')">7</button>
+        <button onclick="append('8')">8</button>
+        <button onclick="append('9')">9</button>
+        <button onclick="append('/')">÷</button>
 
+        <button onclick="append('4')">4</button>
+        <button onclick="append('5')">5</button>
+        <button onclick="append('6')">6</button>
+        <button onclick="append('*')">×</button>
+
+        <button onclick="append('1')">1</button>
+        <button onclick="append('2')">2</button>
+        <button onclick="append('3')">3</button>
+        <button onclick="append('-')">−</button>
+
+        <button onclick="append('0')">0</button>
+        <button onclick="append('.')">.</button>
+        <button class="equal" onclick="calculate()">=</button>
+        <button onclick="append('+')">+</button>
+
+        <button class="clear" onclick="clearDisplay()">C</button>
+      </div>
+      <div class="calculator-actions">
+        <button onclick="toggleHistory()">Show / Hide History</button>
+        <button class="clear" onclick="clearHistory()">Clear All</button>
+      </div>
+    </div>
+    <!-- History -->
+    <div class="history" id="historyBox">
+      <h3>Calculation History</h3>
+      <ul id="historyList"></ul>
+    </div>
+
+  </div>
+  
+
+  <script>
+    const display = document.getElementById('display');
+    const historyList = document.getElementById('historyList');
+    const historyBox = document.getElementById('historyBox');
+
+    let historyData = JSON.parse(localStorage.getItem('calcHistory')) || [];
+
+    function append(value) {
+      display.value += value;
+    }
+
+    function clearDisplay() {
+      display.value = '';
+    }
+
+    function calculate() {
+      try {
+        let expression = display.value;
+        let result = eval(expression);
+        display.value = result;
+
+        let record = `${expression} = ${result}`;
+        historyData.unshift(record);
+        saveHistory();
+        renderHistory();
+      } catch {
+        display.value = "Error";
+      }
+    }
+
+    function toggleHistory() {
+      historyBox.style.display = historyBox.style.display === "none" ? "block" : "none";
+    }
+
+    function clearHistory() {
+      if (confirm("Clear all history?")) {
+        historyData = [];
+        saveHistory();
+        renderHistory();
+      }
+    }
+
+    function deleteHistory(index) {
+      historyData.splice(index, 1);
+      saveHistory();
+      renderHistory();
+    }
+
+    function saveHistory() {
+      localStorage.setItem('calcHistory', JSON.stringify(historyData));
+    }
+
+    function renderHistory() {
+      historyList.innerHTML = '';
+      historyData.forEach((item, index) => {
+        let li = document.createElement('li');
+        li.innerHTML = `${item} <button class="delete-btn" onclick="deleteHistory(${index})">❌</button>`;
+        historyList.appendChild(li);
+      });
+    }
+
+    // Keyboard support
+    document.addEventListener("keydown", (event) => {
+      const key = event.key;
+
+      if (!isNaN(key) || key === ".") {
+        append(key);
+      } else if (["+", "-", "*", "/"].includes(key)) {
+        append(key);
+      } else if (key === "Enter" || key === "=") {
+        event.preventDefault();
+        calculate();
+      } else if (key === "Backspace") {
+        display.value = display.value.slice(0, -1);
+      } else if (key === "Escape") {
+        clearDisplay();
+      }
+    });
+
+    // Render on load
+    renderHistory();
+  </script>
 </body>
+
 </html>
