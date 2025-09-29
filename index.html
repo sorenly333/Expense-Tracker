@@ -210,10 +210,11 @@
     <a href="./food-expense-weekly.html" class="btn">Food Expense Weekly</a>
     <a href="./total-daily-report.html" class="btn">Total Daily Report</a>
     <a href="./monthly-food-report.html" class="btn">Monthly Food Report</a>
+    <button class="btn" onclick="toggleExpense()">Show / Hide Monthly Expense</button>
   </div>
-<!-- Expense -->
-  <h1>Expense</h1>
-  <div class="container">
+  <!-- Expense -->
+  <div class="container" id="expenseBox">
+    <h1>Monthly Expense</h1>
     <table>
       <thead>
         <tr>
@@ -295,7 +296,7 @@
     </div>
 
   </div>
-  
+
 
   <script>
     const display = document.getElementById('display');
@@ -357,6 +358,12 @@
         historyList.appendChild(li);
       });
     }
+
+    function toggleExpense() {
+      const box = document.getElementById("expenseBox");
+      box.style.display = (box.style.display === "none") ? "block" : "none";
+    }
+
 
     // Keyboard support
     document.addEventListener("keydown", (event) => {
