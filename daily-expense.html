@@ -112,6 +112,8 @@
     <input type="date" id="filterDate">
     <button onclick="filterByDate()">Filter</button>
     <button onclick="clearFilter()">Show All</button>
+    <h3>Filter by Item</h3>
+    <input type="text" id="filterItem" placeholder="Search by item name...">
 
     <table id="dataTable">
         <thead>
@@ -135,9 +137,9 @@
         let dailyData = JSON.parse(localStorage.getItem('dailyExpense')) || [];
         let counter = parseInt(localStorage.getItem('dailyExpenseCounter')) || 1; // track Nº
 
-        function renderTable() {
+        function renderTable(data = dailyData) {
             tableBody.innerHTML = "";
-            dailyData.forEach((row, index) => {
+            data.forEach((row, index) => {
                 let tr = document.createElement('tr');
                 tr.innerHTML = `
         <td>${row.no}</td>
@@ -247,6 +249,16 @@
             document.getElementById('filterDate').value = "";
             renderTable();
         }
+
+        // 🔍 Filter by item (real-time)
+        const filterItemInput = document.getElementById('filterItem');
+        filterItemInput.addEventListener('input', () => {
+            const searchText = filterItemInput.value.toLowerCase();
+            const filtered = dailyData.filter(row =>
+                row.item.toLowerCase().includes(searchText)
+            );
+            renderTable(filtered);
+        });
 
 
         renderTable();
